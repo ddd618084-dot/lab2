@@ -1,4 +1,4 @@
-"""Задачи первой части лабораторной: Pandas и Titanic."""
+"""Задания первой части лабораторной: Pandas и Titanic."""
 from __future__ import annotations
 
 import pandas as pd
@@ -7,9 +7,32 @@ from grader_contracts.pandas_tasks import TitanicInput, TitanicSummary
 
 
 def analyze_titanic(data: TitanicInput) -> TitanicSummary:
-    """Выполните загрузку и анализ датасета Titanic.
+    """Выполните загрузку и анализ датасета Titanic."""
+    df = pd.read_csv(data.path)
 
-    Нужно: посчитать пропуски, число пассажиров старше 30 лет, средний возраст
-    и долю выживших по классам, а также пять наибольших тарифов по убыванию.
-    """
-    raise NotImplementedError
+    missing_values = {col: int(df[col].isna().sum()) for col in df.columns}
+
+    passengers_over_30 = int((df["Age"] > 30).sum())
+
+    mean_age_by_class = {
+        int(k): float(v)
+        for k, v in df.groupby("Pclass")["Age"].mean().items()
+    }
+
+    survival_rate_by_class = {
+        int(k): float(v)
+        for k, v in df.groupby("Pclass")["Survived"].mean().items()
+    }
+
+    top_fare = [
+        float(x)
+        for x in df["Fare"].dropna().sort_values(ascending=False).head(5).tolist()
+    ]
+
+    return TitanicSummary(
+        missing_values=missing_values,
+        passengers_over_30=passengers_over_30,
+        mean_age_by_class=mean_age_by_class,
+        survival_rate_by_class=survival_rate_by_class,
+        top_fare=top_fare,
+    )
